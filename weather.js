@@ -1,42 +1,69 @@
 const app = {
   inite: () => {
-    window.addEventListener("load", app.fetchWeather);
-    window.addEventListener("load", app.updateWetherMap);
+    window.addEventListener("load", app.getWeatherForecast);
+    window.addEventListener("load", app.fetchCurrentWeather);
   },
-  fetchWeather: () => {
-    // Get the user current location
-    app.getlocation(
-      (position) => {
-        // Success callback: make a request to the OpenWeatherMap API to get the weather forecast
-        const key = config.API_KEY;
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        const units = "metric";
-        const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${key}`;
-        // const url2 = `https://weatherbit-v1-mashape.p.rapidapi.com/forecast/daily?lat=${lat}&lon=${lon}&units=${units}&key=${key2}`;
+  getWeatherForecast: () => {
+    // Check if the data is already in the cache
+    let cachedData = localStorage.getItem("weatherData");
+    let lastUpdated = localStorage.getItem("lastUpdated");
+    let currentTime = Date.now();
+    // If it is and it was updated within the last hour
+    if (cachedData && lastUpdated && currentTime - lastUpdated < 3600000) {
+      // Parse the JSON and return it
+      let data = JSON.parse(cachedData);
+      console.log(data);
+      app.showWetherUi(data);
+    } else {
+      // Get the user current location
+      app.getlocation(
+        (position) => {
+          // Success callback: make a request to the WatherBit API to get the weather forecast
+          const key = config.API_KEY_WEATHERBIT;
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          const units = "metric";
+          const url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&units=${units}&key=${key}`;
 
-        fetch(url)
-          .then((response) => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error("Something went wrong");
-            }
-          })
-          .then((data) => {
-            console.log(data);
-            app.showWetherUi(data);
-          })
-          .catch((error) => {
-            console.error(error);
-          });
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+          fetch(url)
+            .then((response) => {
+              if (response.ok) {
+                return response.json();
+              } else {
+                throw new Error("Something went wrong");
+              }
+            })
+            .then((response) => {
+              let cachedData = localStorage.getItem("weatherData");
+              if (cachedData) {
+                return JSON.parse(cachedData);
+              } else {
+                localStorage.setItem("weatherData", JSON.stringify(response));
+                localStorage.setItem("lastUpdated", Date.now());
+                return response;
+              }
+            })
+            .then((data) => {
+              console.log(data);
+              app.showWetherUi(data);
+            })
+            .catch((error) => {
+              console.error(
+                error +
+                  "Failed to get the wether for wetherbit API or from cache"
+              );
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+    }
   },
-  updateWetherMap: () => {
+  fetchCurrentWeather: () => {
     app.getlocation(
       (position) => {
         // Success callback: make a request to the OpenWeatherMap API to get the weather forecast
@@ -95,20 +122,43 @@ const app = {
       // If it is not night time and there is no precipitation, but the cloud cover is greater than 50%
       map = "/assets/cloudy-skies.mp4";
     }
-
     return map;
   },
 
-  showWetherUi: (data) => {
+  showWetherUi: (response) => {
     const body = document.querySelector("body");
     const row = document.querySelector(".row");
-    // const temperature = data.main.temp;
-    // const description = data.weather[0].description;
-    // const maxTemp = data.main.temp_max;
-    // const minTemp = data.main.temp_min;
-    // document.getElementById("temperature").innerHTML = temperature;
-    // document.getElementById("description").innerHTML = description;
-    // document.getElementById("maxTemp").innerHTML =
+    console.log(response);
+
+    let content = "";
+    response.data.map((day, index) => {
+      let datetime = day.datetime;
+      let date = new Date(datetime);
+      let days = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      let dayInString = days[date.getUTCDay()];
+      console.log(dayInString); // "Saturday"
+      content += `
+        <div class="col-md-4 mt-4">
+        <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">${dayInString}</h5>
+          <p class="card-text">Maximum Temperature: ${day.app_max_temp}°F</p>
+          <p class="card-text">Minimum Temperature: ${day.app_min_temp}°F</p>
+          <img src='https://www.weatherbit.io/static/img/icons/${day.weather.icon}.png' alt="Weather Icon">
+        </div>
+      </div>
+              </div>
+      `;
+      document.querySelector(".row").innerHTML = content;
+    });
     //   "Max Temp: " + maxTemp + " " + "/ " + "Min temp: " + minTemp;
   },
   getlocation: (success, error) => {
