@@ -91,7 +91,9 @@ const app = {
             }
           })
           .then((data) => {
+            console.log(data);
             app.displayBackground(data);
+            app.displayCurrentWeather(data);
           })
           .catch((error) => {
             console.error(error);
@@ -101,6 +103,45 @@ const app = {
         console.error(error);
       }
     );
+  },
+  displayCurrentWeather: (data) =>{
+    let sunRiseSunSet = app.getSunriseSunset(data);
+    let currentDate = new Date((data.dt + data.timezone) * 1000);
+    let dayOfWeek = currentDate.toLocaleString("en-US", { weekday: "long" });
+    let month = currentDate.toLocaleString("en-US", { month: "short" });
+    let day = currentDate.getDate();
+    const today = new Date();
+    const time = today.getHours() + ":" + today.getMinutes()
+    console.log(time);
+    let content = "";
+    content += `
+    <h1 class="text-secondary mt-4">${time}</h1>
+    <h1 class="text-secondary mt-4">${dayOfWeek} ${day} ${month}</h1>
+    <div class="current_weather_card mt-4" style="max-width: 20rem;">
+    <div class="card_body_current text-secondary">
+      <div class="wether_info">
+      <h5 class="card-title">City:</h5>
+      <h5 class="card-title">${data.name}</h5>
+      </div>
+      <div class="wether_info">
+      <h5 class="card-title">Feels like:</h5>
+      <h5 class="card-title">${data.main.feels_like}°C</h5>
+      </div>
+      <div class="wether_info">
+      <h5 class="card-title">Wind Speed:</h5>
+      <h5 class="card-title">${data.wind.speed}</h5>
+      </div>
+      <div class="wether_info">
+      <h5 class="card-title">sunrise: </h5>
+      <h5 class="card-title">${sunRiseSunSet.sunrise}</h5>
+      </div>
+      <div class="wether_info">
+      <h5 class="card-title">sunset: </h5>
+      <h5 class="card-title">${sunRiseSunSet.sunset}</h5>
+      </div>
+    </div>
+  </div>`;
+      document.querySelector(".row").innerHTML = content;
   },
   displayBackground: (data) => {
     const weather = {
@@ -139,35 +180,31 @@ const app = {
     response.data.map((day, index) => {
       let datetime = day.datetime;
       let date = new Date(datetime);
-      let days = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ];
+      let days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
       let dayInString = days[date.getUTCDay()];
       content += `
         <div class="wether_card_item">
         <div class="card-body">
         <div class="day_container">
         <h5 class="card-title day">${dayInString}</h5>
-        </div>
-
+          </div>
           <img src='https://www.weatherbit.io/static/img/icons/${day.weather.icon}.png' alt="Weather Icon" class="forecast_icon">
           <div class="temp_container">
           <p class="card-text">Max: ${day.app_max_temp}°C</p>
           <p class="card-text">Min: ${day.app_min_temp}°C</p>
           </div>
-     
-      </div>
-              </div>
-      `;
+          </div>
+        </div>`;
       document.querySelector(".wether_forecast").innerHTML = content;
     });
-    //   "Max Temp: " + maxTemp + " " + "/ " + "Min temp: " + minTemp;
+  },
+  getSunriseSunset: (response) =>{
+    let sunrise = new Date(response.sys.sunrise * 1000);
+    let sunset = new Date(response.sys.sunset * 1000);
+    let options = { hour: 'numeric', minute: 'numeric', hour12: true };
+    let sunriseTime = sunrise.toLocaleString('en-US', options);
+    let sunsetTime = sunset.toLocaleString('en-US', options);
+    return { sunrise: sunriseTime, sunset: sunsetTime };
   },
   getlocation: (success, error) => {
     navigator.geolocation.getCurrentPosition(success, error);

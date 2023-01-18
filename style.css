@@ -57,6 +57,22 @@ video {
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.2);
 }
+.current_weather_card{
+  margin: 0 10px 10px 10px;
+  border: 1px solid #eee;
+  padding: 20px;
+  border-radius: 10px;
+  background: rgba(248, 244, 244, 0.2);
+}
+.card_body_current{
+  padding: 20px;
+  border-radius: 10px;
+  margin: 10px 0;
+}
+.wether_info{
+  display: flex;
+  justify-content: space-between;
+}
 .skills-slider {
   margin: 0 auto;
   position: relative;
