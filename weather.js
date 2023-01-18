@@ -4,14 +4,8 @@ const app = {
     window.addEventListener("load", app.fetchCurrentWeather);
   },
   getWeatherForecast: () => {
-    // Check if the data is already in the cache
-    let cachedData = localStorage.getItem("weatherData");
-    let lastUpdated = localStorage.getItem("lastUpdated");
-    let currentTime = Date.now();
-    // If it is and it was updated within the last hour
-    if (cachedData && lastUpdated && currentTime - lastUpdated < 3600000) {
-      // Parse the JSON and return it
-      let data = JSON.parse(cachedData);
+    let data = app.checkCache();
+    if (data) {
       console.log(data);
       app.showWetherUi(data);
     } else {
@@ -28,6 +22,7 @@ const app = {
           fetch(url)
             .then((response) => {
               if (response.ok) {
+                console.log("Scucesses fetching");
                 return response.json();
               } else {
                 throw new Error("Something went wrong");
@@ -63,6 +58,20 @@ const app = {
       );
     }
   },
+  fetchData: (position) => {},
+  checkCache: () => {
+    let cachedData = localStorage.getItem("weatherData");
+    let lastUpdated = localStorage.getItem("lastUpdated");
+    let currentTime = Date.now();
+    // If it is and it was updated within the last hour
+    if (cachedData && lastUpdated && currentTime - lastUpdated < 3600000) {
+      console.log("suceess");
+      // Parse the JSON and return it
+      let data = JSON.parse(cachedData);
+      return data;
+    }
+    return null;
+  },
   fetchCurrentWeather: () => {
     app.getlocation(
       (position) => {
@@ -82,7 +91,7 @@ const app = {
             }
           })
           .then((data) => {
-            app.showMapInUi(data);
+            app.displayBackground(data);
           })
           .catch((error) => {
             console.error(error);
@@ -93,7 +102,7 @@ const app = {
       }
     );
   },
-  showMapInUi: (data) => {
+  displayBackground: (data) => {
     const weather = {
       temperature: data.main.temp,
       precipitation: data.rain ? data.rain["3h"] : 0,
@@ -103,33 +112,29 @@ const app = {
       clouds: data.clouds,
     };
     console.log(weather);
-    const map = app.getWeatherMap(weather);
-    document.querySelector("#live-bg").src = map;
+    const background = app.setWeatherBackground(weather);
+    document.querySelector("#live-bg").src = background;
   },
-  getWeatherMap: (weather) => {
-    let map = "/assets/clear-skies.mp4";
+  setWeatherBackground: (weather) => {
+    let background = "/assets/clear-skies.mp4";
     const currentTime = new Date().getTime();
     // Calculate the sunset and sunrise times in milliseconds since the epoch
     const sunsetTime = new Date(weather.isNight.sunset * 1000).getTime();
     const sunriseTime = new Date(weather.isNight.sunrise * 1000).getTime();
     if (currentTime > sunsetTime || currentTime < sunriseTime) {
       // If it is currently after sunset or before sunrise, night
-      map = "/assets/clear-skies-night.mp4";
+      background = "/assets/clear-skies-night.mp4";
     } else if (weather.isNight.id >= 500 && weather.isNight.id < 600) {
       // If it is not night time and there is rain
-      map = "";
+      background = "";
     } else if (weather.clouds.all >= 50) {
       // If it is not night time and there is no precipitation, but the cloud cover is greater than 50%
-      map = "/assets/cloudy-skies.mp4";
+      background = "/assets/cloudy-skies.mp4";
     }
-    return map;
+    return background;
   },
 
   showWetherUi: (response) => {
-    const body = document.querySelector("body");
-    const row = document.querySelector(".row");
-    console.log(response);
-
     let content = "";
     response.data.map((day, index) => {
       let datetime = day.datetime;
@@ -144,20 +149,23 @@ const app = {
         "Saturday",
       ];
       let dayInString = days[date.getUTCDay()];
-      console.log(dayInString); // "Saturday"
       content += `
-        <div class="col-md-4 mt-4">
-        <div class="card text-center">
+        <div class="wether_card_item">
         <div class="card-body">
-          <h5 class="card-title">${dayInString}</h5>
-          <p class="card-text">Maximum Temperature: ${day.app_max_temp}°F</p>
-          <p class="card-text">Minimum Temperature: ${day.app_min_temp}°F</p>
-          <img src='https://www.weatherbit.io/static/img/icons/${day.weather.icon}.png' alt="Weather Icon">
+        <div class="day_container">
+        <h5 class="card-title day">${dayInString}</h5>
         </div>
+
+          <img src='https://www.weatherbit.io/static/img/icons/${day.weather.icon}.png' alt="Weather Icon" class="forecast_icon">
+          <div class="temp_container">
+          <p class="card-text">Max: ${day.app_max_temp}°C</p>
+          <p class="card-text">Min: ${day.app_min_temp}°C</p>
+          </div>
+     
       </div>
               </div>
       `;
-      document.querySelector(".row").innerHTML = content;
+      document.querySelector(".wether_forecast").innerHTML = content;
     });
     //   "Max Temp: " + maxTemp + " " + "/ " + "Min temp: " + minTemp;
   },
