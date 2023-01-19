@@ -7,7 +7,7 @@ const app = {
     let data = app.checkCache();
     if (data) {
       console.log(data);
-      app.showWetherUi(data);
+      app.showWeatherUi(data);
     } else {
       // Get the user current location
       app.getlocation(
@@ -18,8 +18,12 @@ const app = {
           const lon = position.coords.longitude;
           const units = "metric";
           const url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&units=${units}&key=${key}`;
-
-          fetch(url)
+          const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+          fetch(proxyUrl+url, {
+            headers: {
+              origin: "http://127.0.0.1:5500/"
+            }
+          })
             .then((response) => {
               if (response.ok) {
                 console.log("Scucesses fetching");
@@ -40,7 +44,7 @@ const app = {
             })
             .then((data) => {
               console.log(data);
-              app.showWetherUi(data);
+              app.showWeatherUi(data);
             })
             .catch((error) => {
               console.error(
@@ -63,14 +67,22 @@ const app = {
     let cachedData = localStorage.getItem("weatherData");
     let lastUpdated = localStorage.getItem("lastUpdated");
     let currentTime = Date.now();
-    // If it is and it was updated within the last hour
-    if (cachedData && lastUpdated && currentTime - lastUpdated < 3600000) {
-      console.log("suceess");
-      // Parse the JSON and return it
+    let developerMode = true
+    if(developerMode){
       let data = JSON.parse(cachedData);
       return data;
     }
-    return null;
+    // If data and timestamp exist in cache and last updated time is within the last hour
+
+    if (cachedData && lastUpdated && currentTime - lastUpdated < 3600000) {
+      console.log("Data retrieved from cache.");
+      // Parse the JSON and return it
+      let data = JSON.parse(cachedData);
+      return data;
+    } else {
+      console.log("No data in cache or data too old. Fetching from API.");
+      return null;
+    }
   },
   fetchCurrentWeather: () => {
     app.getlocation(
@@ -110,13 +122,21 @@ const app = {
     let dayOfWeek = currentDate.toLocaleString("en-US", { weekday: "long" });
     let month = currentDate.toLocaleString("en-US", { month: "short" });
     let day = currentDate.getDate();
+
     const today = new Date();
-    const time = today.getHours() + ":" + today.getMinutes()
-    console.log(time);
+    const hour = today.getHours();
+    const minutes = today.getMinutes();
+    const am_pm = hour >= 12 ? 'PM' : 'AM';
+    console.log(`${hour}:${minutes} ${am_pm}`);
+
     let content = "";
     content += `
-    <h1 class="text-secondary mt-4">${time}</h1>
-    <h1 class="text-secondary mt-4">${dayOfWeek} ${day} ${month}</h1>
+    <div class="time_container">
+    <span class="time text-secondary mt-4">${hour}:${minutes}</span>
+    <span class="time_am_pm text-secondary">${am_pm}</span>
+    </div>
+    
+    <span class="date text-secondary mt-4">${dayOfWeek} ${day} ${month}</span>
     <div class="current_weather_card mt-4" style="max-width: 20rem;">
     <div class="card_body_current text-secondary">
       <div class="wether_info">
@@ -141,7 +161,7 @@ const app = {
       </div>
     </div>
   </div>`;
-      document.querySelector(".row").innerHTML = content;
+      document.querySelector(".col-sm-4").innerHTML = content;
   },
   displayBackground: (data) => {
     const weather = {
@@ -175,7 +195,7 @@ const app = {
     return background;
   },
 
-  showWetherUi: (response) => {
+  showWeatherUi: (response) => {
     let content = "";
     response.data.map((day, index) => {
       let datetime = day.datetime;

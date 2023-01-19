@@ -57,19 +57,19 @@ video {
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.2);
 }
-.current_weather_card{
-  margin: 0 10px 10px 10px;
+.current_weather_card {
+  margin: 0px 0px 36px 0px;
   border: 1px solid #eee;
-  padding: 20px;
+  padding: 10px;
   border-radius: 10px;
   background: rgba(248, 244, 244, 0.2);
 }
-.card_body_current{
+.card_body_current {
   padding: 20px;
   border-radius: 10px;
   margin: 10px 0;
 }
-.wether_info{
+.wether_info {
   display: flex;
   justify-content: space-between;
 }
@@ -86,4 +86,31 @@ video {
 }
 .forecast_icon {
   display: flex;
+}
+.time {
+  font-size: 60px;
+}
+
+.date {
+  font-size: 25px;
+  margin: 0px 0px 7px 0px;
+}
+.time_am_pm {
+  font-size: 35px;
+  margin-left: 10px;
+}
+.time_container {
+  margin: 0px 10px 10px 0px;
+}
+@media (min-width: 576px) {
+  .ml-auto {
+    margin-left: 3.666667%;
+  }
+}
+
+@media (min-width: 576px) {
+  .ml-auto {
+    flex: 0 0 auto;
+    width: 23.33333333%;
+  }
 }
