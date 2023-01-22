@@ -1,79 +1,57 @@
 const app = {
   inite: () => {
     window.addEventListener("load", app.getWeatherForecast);
-    window.addEventListener("load", app.fetchCurrentWeather);
+    window.addEventListener("load", app.getCurrentWeather);
   },
   getWeatherForecast: () => {
     let data = app.checkCache();
     if (data) {
-      console.log(data);
-      app.showWeatherUi(data);
+        console.log(data);
+        app.showForecastWeather(data);
     } else {
-      // Get the user current location
-      app.getlocation(
-        (position) => {
-          // Success callback: make a request to the WatherBit API to get the weather forecast
-          const key = config.API_KEY_WEATHERBIT;
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          const units = "metric";
-          const url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&units=${units}&key=${key}`;
-          const proxyUrl = "https://cors-anywhere.herokuapp.com/";
-          fetch(proxyUrl+url, {
-            headers: {
-              origin: "http://127.0.0.1:5500/"
-            }
-          })
-            .then((response) => {
-              if (response.ok) {
-                console.log("Scucesses fetching");
-                return response.json();
-              } else {
-                throw new Error("Something went wrong");
-              }
-            })
-            .then((response) => {
-              let cachedData = localStorage.getItem("weatherData");
-              if (cachedData) {
-                return JSON.parse(cachedData);
-              } else {
-                localStorage.setItem("weatherData", JSON.stringify(response));
-                localStorage.setItem("lastUpdated", Date.now());
-                return response;
-              }
-            })
-            .then((data) => {
-              console.log(data);
-              app.showWeatherUi(data);
-            })
-            .catch((error) => {
-              console.error(
-                error +
-                  "Failed to get the wether for wetherbit API or from cache"
-              );
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        },
-        (error) => {
-          console.error(error);
-        }
-      );
+        app.getlocation(position => {
+            app.fetchForecastData(position)
+                .then(data => {
+                    console.log(data);
+                    app.showForecastWeather(data);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        }, error => {
+            console.error(error);
+        });
     }
   },
-  fetchData: (position) => {},
+  fetchForecastData: async (position) => {
+    const key = config.API_KEY_WEATHERBIT;
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+    const units = "metric";
+    const url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&units=${units}&key=${key}`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error("Something went wrong");
+        }
+        const data = await response.json();
+        localStorage.setItem("weatherData", JSON.stringify(data));
+        localStorage.setItem("lastUpdated", Date.now());
+        return data;
+    } catch (error) {
+        throw error;
+    }
+  },
   checkCache: () => {
     let cachedData = localStorage.getItem("weatherData");
     let lastUpdated = localStorage.getItem("lastUpdated");
     let currentTime = Date.now();
-    let developerMode = true
+    let developerMode = false
     if(developerMode){
       let data = JSON.parse(cachedData);
       return data;
     }
     // If data and timestamp exist in cache and last updated time is within the last hour
-
     if (cachedData && lastUpdated && currentTime - lastUpdated < 3600000) {
       console.log("Data retrieved from cache.");
       // Parse the JSON and return it
@@ -84,37 +62,38 @@ const app = {
       return null;
     }
   },
-  fetchCurrentWeather: () => {
-    app.getlocation(
-      (position) => {
-        // Success callback: make a request to the OpenWeatherMap API to get the weather forecast
-        const key = config.API_KEY;
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        const units = "metric";
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${key}`;
+  fetchCurrentWeather: async (position) => {
+      const key = config.API_KEY;
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      const units = "metric";
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${key}`;
 
-        fetch(url)
-          .then((response) => {
-            if (response.ok) {
-              return response.json();
-            } else {
-              throw new Error("Something went wrong");
-            }
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error("Something went wrong");
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw error;
+    }
+  },
+  getCurrentWeather: () => {
+    app.getlocation(position => {
+      app.fetchCurrentWeather(position)
+          .then(data => {
+              console.log(data);
+              app.displayBackground(data);
+              app.displayCurrentWeather(data);
           })
-          .then((data) => {
-            console.log(data);
-            app.displayBackground(data);
-            app.displayCurrentWeather(data);
-          })
-          .catch((error) => {
-            console.error(error);
+          .catch(error => {
+              console.error(error);
           });
-      },
-      (error) => {
-        console.error(error);
-      }
-    );
+  }, error => {
+      console.error(error);
+  });
   },
   displayCurrentWeather: (data) =>{
     let sunRiseSunSet = app.getSunriseSunset(data);
@@ -195,10 +174,11 @@ const app = {
     return background;
   },
 
-  showWeatherUi: (response) => {
+  showForecastWeather: (response) => {
     let content = "";
     response.data.map((day, index) => {
       let datetime = day.datetime;
+      console.log(day.weather.icon);
       let date = new Date(datetime);
       let days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",];
       let dayInString = days[date.getUTCDay()];
