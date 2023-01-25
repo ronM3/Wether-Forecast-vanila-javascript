@@ -17,8 +17,7 @@ const app = {
     } else {
       app.getlocation(
         (position) => {
-          app
-            .fetchForecastData(position)
+          app.fetchForecastData(position)
             .then((data) => {
               console.log(data);
               app.showForecastWeather(data);
@@ -73,8 +72,12 @@ const app = {
   },
   fetchCurrentWeather: async (position) => {
     const key = config.API_KEY;
-    const lon = position.coords ? position.coords.longitude : defaultLocation.longitude;
-    const lat = position.coords ? position.coords.latitude : defaultLocation.latitude;
+    const lon = position.coords
+      ? position.coords.longitude
+      : defaultLocation.longitude;
+    const lat = position.coords
+      ? position.coords.latitude
+      : defaultLocation.latitude;
     const units = "metric";
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${key}`;
     try {
@@ -90,11 +93,13 @@ const app = {
     }
   },
   getCurrentWeather: () => {
-    app.getlocation((position) => {
+    app.getlocation(
+      (position) => {
         if (!position) {
           position = defaultLocation;
         }
-        app.fetchCurrentWeather(position)
+        app
+          .fetchCurrentWeather(position)
           .then((data) => {
             app.displayBackground(data);
             app.displayCurrentWeather(data);
@@ -108,28 +113,54 @@ const app = {
       }
     );
   },
-  displayCurrentWeather: (data) => {
+  getCurrentTimeAndDate: (data) => {
     let sunRiseSunSet = app.getSunriseSunset(data);
     let currentDate = new Date((data.dt + data.timezone) * 1000);
     let dayOfWeek = currentDate.toLocaleString("en-US", { weekday: "long" });
     let month = currentDate.toLocaleString("en-US", { month: "short" });
     let day = currentDate.getDate();
-
     const today = new Date();
     const hour = today.getHours();
     const minutes = today.getMinutes();
     const am_pm = hour >= 12 ? "PM" : "AM";
-    console.log(`${hour}:${minutes} ${am_pm}`);
+    const DateAndTime = {
+      sunRiseSunSet,
+      currentDate,
+      dayOfWeek,
+      month,
+      day,
+      hour,
+      minutes,
+      am_pm,
+    };
+    return DateAndTime;
+  },
+  displayCurrentWeather: (data) => {
+  const currentWeatherData = app.getCurrentTimeAndDate(data);
+  const timeContainer = app.createTimeContainer(currentWeatherData);
+  const date = app.createDate(currentWeatherData);
+  const weatherCard = app.createWeatherCard(data, currentWeatherData);
 
-    let content = "";
-    content += `
-    <div class="time_container">
-    <span class="time text-secondary mt-4">${hour}:${minutes}</span>
-    <span class="time_am_pm text-secondary">${am_pm}</span>
-    </div>
-    
-    <span class="date text-secondary mt-4">${dayOfWeek} ${day} ${month}</span>
-    <div class="current_weather_card mt-4" style="max-width: 20rem;">
+  const content = `<div class="col-sm-4 ml-auto">
+      ${timeContainer}
+      ${date}
+      ${weatherCard}
+    </div>`;
+  document.querySelector(".row").innerHTML = content;
+  },
+  createTimeContainer: (data) => {
+    return (
+    `<div class="time_container">
+    <span class="time text-secondary mt-4">${data.hour}:${data.minutes}</span>
+    <span class="time_am_pm text-secondary">${data.am_pm}</span>
+    </div>`)
+  },
+  createDate: (data) => {
+    return (`<span class="date text-secondary mt-4">${data.dayOfWeek} ${data.day} ${data.month}</span>`);
+  },
+  createWeatherCard: (data, currentWeatherData) => {
+    return (
+  `<div class="current_weather_card mt-4" style="max-width: 20rem;">
     <div class="card_body_current text-secondary">
       <div class="wether_info">
       <h5 class="card-title">City:</h5>
@@ -145,15 +176,14 @@ const app = {
       </div>
       <div class="wether_info">
       <h5 class="card-title">sunrise: </h5>
-      <h5 class="card-title">${sunRiseSunSet.sunrise}</h5>
+      <h5 class="card-title">${currentWeatherData.sunRiseSunSet.sunrise}</h5>
       </div>
       <div class="wether_info">
       <h5 class="card-title">sunset: </h5>
-      <h5 class="card-title">${sunRiseSunSet.sunset}</h5>
+      <h5 class="card-title">${currentWeatherData.sunRiseSunSet.sunset}</h5>
       </div>
     </div>
-  </div>`;
-    document.querySelector(".col-sm-4").innerHTML = content;
+  </div>`);
   },
   displayBackground: (data) => {
     const weather = {
@@ -186,7 +216,6 @@ const app = {
     }
     return background;
   },
-
   showForecastWeather: (response) => {
     let content = "";
     response.data.map((day, index) => {
@@ -238,7 +267,8 @@ const app = {
   handleFallback: (error, func) => {
     if (error.code === error.PERMISSION_DENIED) {
       position = app.getLocationOrDefault(null);
-      app.fetchCurrentWeather(position)
+      app
+        .fetchCurrentWeather(position)
         .then((data) => {
           app.displayBackground(data);
           app.displayCurrentWeather(data);

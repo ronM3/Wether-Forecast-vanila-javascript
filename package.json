@@ -1,7 +1,7 @@
 {
   "name": "wether-forecast",
   "version": "1.0.0",
-  "description": "",
+  "description": "This project is a weather forecast app that displays the current weather and a 7-day forecast for the user's current location. The app uses the HTML5 Geolocation API to get the user's current location and the Weatherbit and OpenWeatherMap APIs to fetch weather data. The app also uses Local storage to store data for future use\r and also to optimize performance.",
   "main": "weather.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,5 +9,13 @@
   "author": "Ron Motola",
   "license": "ISC",
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ronM3/Wether-Forecast-vanila-javascript.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ronM3/Wether-Forecast-vanila-javascript/issues"
+  },
+  "homepage": "https://github.com/ronM3/Wether-Forecast-vanila-javascript#readme"
 }
