@@ -4,7 +4,7 @@ This project is a weather forecast app that displays the current weather and a 7
 and also to optimize performance.
 
 # Progress Demo
- ![](https://github.com/ronM3/Freshmarket-shop/blob/main/weather-web-gif.gif)
+ ![](https://github.com/ronM3/Wether-Forecast-vanila-javascript/blob/main/weather-web-gif.gif)
  
 ## Features
 - User-friendly interface
