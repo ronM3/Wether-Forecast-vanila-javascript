@@ -3,6 +3,9 @@
 This project is a weather forecast app that displays the current weather and a 7-day forecast for the user's current location. The app uses the HTML5 Geolocation API to get the user's current location and the Weatherbit and OpenWeatherMap APIs to fetch weather data. The app also uses Local storage to store data for future use
 and also to optimize performance.
 
+# Progress Demo
+ ![](https://github.com/ronM3/Freshmarket-shop/blob/main/weather-web-gif.gif)
+ 
 ## Features
 - User-friendly interface
 - Responsive design
@@ -20,9 +23,6 @@ and also to optimize performance.
 - Weatherbit API
 - HTML5 Geolocation API
 - Local Storage
-
-# Demo
-Soon
 
 # Live link
 Soon
