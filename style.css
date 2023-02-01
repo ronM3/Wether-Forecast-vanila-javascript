@@ -331,6 +331,10 @@ span.main_big_h {
   letter-spacing: 1px;
   padding-left: 40px;
 }
+.forecast_temp{
+  color: white;
+  font-weight: 700;
+}
 #forecastGraph {
   animation-duration: 2.6s;
   animation-fill-mode: both;

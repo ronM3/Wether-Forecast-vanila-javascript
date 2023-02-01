@@ -213,13 +213,15 @@ const app = {
     const country = data.sys.country;
     let weatherSummary = "";
     if (weather.main === "Clear") {
-      weatherSummary = `The current weather in ${location}, ${country} is clear with a temperature of ${main.temp}°C and humidity of ${main.humidity}%.`;
+      weatherSummary = `The current weather in ${location}, ${country} is clear with a temperature of ${main.temp}°C and a humidity level of ${main.humidity}%. The skies are free of clouds and it's a great day to be outside.`;
     } else if (weather.main === "Rain") {
-      weatherSummary = `The current weather in ${location}, ${country} is rainy with a temperature of ${main.temp}°C and humidity of ${main.humidity}%.`;
+      weatherSummary = `The current weather in ${location}, ${country} is rainy with a temperature of ${main.temp}°C and a humidity level of ${main.humidity}%. It's a good idea to bring an umbrella and a raincoat if you're planning to go out.`;
     } else if (weather.main === "Clouds") {
-      weatherSummary = `The current weather in ${location}, ${country} is cloudy with a temperature of ${main.temp}°C and humidity of ${main.humidity}%.`;
+      weatherSummary = `The current weather in ${location}, ${country} is cloudy with a temperature of ${main.temp}°C and a humidity level of ${main.humidity}%. Although it's not sunny, it's still a comfortable day to be outside.`;
+    } else if (weather.main === "Thunderstorm") {
+      weatherSummary = `The current weather in ${location}, ${country} is experiencing a thunderstorm with a temperature of ${main.temp}°C and a humidity level of ${main.humidity}%. Please take necessary precautions and stay indoors if possible.`;
     }
-    const weatherSummaryInfo = `<div class="col-sm-12 mt-5 mb-4">
+    const weatherSummaryInfo = `<div class="col-sm-12 mt-3 mb-4">
       <h4 class="info_city_h">${location} City</h4>
       <span>${weatherSummary}</span>
       </div>`;
@@ -231,8 +233,9 @@ const app = {
       precipitation: data.rain ? data.rain["3h"] : 0,
       precipitationType: data.snow ? "snow" : "rain",
       cloudCover: data.clouds.all / 100,
-      isNight: data.sys,
+      timeOfDay: data.sys,
       clouds: data.clouds,
+      weatherId: data.weather[0].id
     };
     const background = app.setWeatherBackground(weather);
     document.querySelector("#live-bg").src = background;
@@ -240,18 +243,29 @@ const app = {
   setWeatherBackground: (weather) => {
     let background = "/assets/clear-skies.mp4";
     const currentTime = new Date().getTime();
-    // Calculate the sunset and sunrise times in milliseconds since the epoch
-    const sunsetTime = new Date(weather.isNight.sunset * 1000).getTime();
-    const sunriseTime = new Date(weather.isNight.sunrise * 1000).getTime();
+    const sunsetTime = new Date(weather.timeOfDay.sunset * 1000).getTime();
+    const sunriseTime = new Date(weather.timeOfDay.sunrise * 1000).getTime();
+        // If it is currently after sunset or before sunrise, night cases:
     if (currentTime > sunsetTime || currentTime < sunriseTime) {
-      // If it is currently after sunset or before sunrise, night
-      background = "/assets/clear-skies-night.mp4";
-    } else if (weather.isNight.id >= 500 && weather.isNight.id < 600) {
+        // If it is night time and there is thunderstorm
+      if (weather.weatherId >= 200 && weather.weatherId < 300) {
+        background = "/assets/thunderstorm_night.mp4";
+        // If it is night time and there is rain
+      } else if (weather.weatherId >= 500 && weather.weatherId < 600) {
+        background = "/assets/rainy_skies_night.mp4";
+      } else {
+        background = "/assets/clear-skies-night.mp4";
+      }
+      // day cases:
+    } else if (weather.weatherId >= 200 && weather.weatherId < 300) {
+      // If it is not night time and there is thunderstorm
+      background = "/assets/thunderstorm.mp4";
+    } else if (weather.weatherId >= 500 && weather.weatherId < 600) {
       // If it is not night time and there is rain
-      background = "";
+      background = "/assets/rainy_skies.mp4";
     } else if (weather.clouds.all >= 50) {
       // If it is not night time and there is no precipitation, but the cloud cover is greater than 50%
-      background = "/assets/cloudy-skies.mp4";
+      background = "/assets/cloudy_skies.mp4";
     }
     return background;
   },
@@ -284,8 +298,8 @@ const app = {
             </div>
             <img src='https://www.weatherbit.io/static/img/icons/${day.weather.icon}.png' alt="Weather Icon" class="forecast_icon">
             <div class="temp_container">
-            <p class="card-text">Max: ${day.app_max_temp}°C</p>
-            <p class="card-text">Min: ${day.app_min_temp}°C</p>
+            <p class="card-text forecast_temp">Max: ${day.app_max_temp}°C</p>
+            <p class="card-text forecast_temp">Min: ${day.app_min_temp}°C</p>
             </div>
             </div>
           </div>`;
