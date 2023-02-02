@@ -105,6 +105,7 @@ const app = {
             app.displayBackground(data);
             app.displayCurrentWeather(data);
             // app.displayCurrentInfo(data);
+            app.createMainInfo(data);
             app.getWeatherSummary(data);
           })
           .catch((error) => {
@@ -122,6 +123,8 @@ const app = {
     let dayOfWeek = currentDate.toLocaleString("en-US", { weekday: "long" });
     let month = currentDate.toLocaleString("en-US", { month: "short" });
     let day = currentDate.getDate();
+    let year = currentDate.getFullYear();
+
     const today = new Date();
     const hour = today.getHours();
     const minutes = today.getMinutes();
@@ -135,27 +138,28 @@ const app = {
       hour,
       minutes,
       am_pm,
+      year,
+      country: data.sys.country,
+      icon: data.weather[0].icon
     };
     return DateAndTime;
   },
-  displayCurrentInfo: (data) => {
-    const currentWeatherData = app.getCurrentTimeAndDate(data);
-    const timeContainer = app.createTimeContainer(currentWeatherData);
-    const date = app.createDate(currentWeatherData);
-    const content = `<div>
-      ${timeContainer}
-      ${date}
-      </div>`;
-    //   document.querySelector(".row.current").insertAdjacentHTML('afterend', content);
-    // document.querySelector(".info").innerHTML = content;
-  },
+  // displayCurrentInfo: (data) => {
+  //   const currentWeatherData = app.getCurrentTimeAndDate(data);
+  //   const timeContainer = app.createTimeContainer(currentWeatherData);
+  //   const date = app.createDate(currentWeatherData);
+  //   const content = `<div>
+  //     ${timeContainer}
+  //     ${date}
+  //     </div>`;
+  //   //   document.querySelector(".row.current").insertAdjacentHTML('afterend', content);
+  //   // document.querySelector(".info").innerHTML = content;
+  // },
   displayCurrentWeather: (data) => {
     const currentWeatherData = app.getCurrentTimeAndDate(data);
     const weatherCard = app.createWeatherCard(data, currentWeatherData);
     const weatherContainer = document.querySelector(".row.current");
-    const CurrentTempCol = document.querySelector(
-      ".col-sm-12.mt-4.current_temp_card"
-    );
+    const CurrentTempCol = document.querySelector(".col-sm-12.mt-4.current_temp_card");
     if (CurrentTempCol) {
       weatherContainer.removeChild(CurrentTempCol);
     }
@@ -179,14 +183,62 @@ const app = {
       </div>`;
     document.querySelector(".row.current").appendChild(newCol);
   },
+  createMainInfo: (data) => {
+    const currentWeatherData = app.getCurrentTimeAndDate(data);
+    const dateAndInfo = app.createDateAndInfo(data, currentWeatherData);
+    const mainHeader = app.createMainHeader(data); 
+    const mainTimezone = app.createMainTimezone(data);
+    const mainContent = `
+    ${mainHeader}
+    ${mainTimezone}
+    ${dateAndInfo}
+   `;
+   document.querySelector(".row.main").innerHTML = mainContent;
+  },
+  createMainHeader: (data) => {
+    return `<div class="col-xs-6 mt-5">
+      <div class="main_header">
+          <h4 class="main_small_h">Weather Forecast</h4>
+          <span class="main_big_h first">${data.weather[0].main}</span><span class="main_big_h second">with ${data.weather[0].description}</span>
+      </div>
+  </div>`;
+  },
+  createMainTimezone: (data) => {
+    const timezone = data.timezone;
+    let { lat, lon } = data.coord;
+    const sign = timezone < 0 ? "-" : "+";
+    const hours = Math.floor(Math.abs(timezone) / 3600);
+    const minutes = Math.floor((Math.abs(timezone) % 3600) / 60);
+    const timezoneString = `Etc/GMT${sign}${hours
+      .toString()
+      .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    console.log(timezoneString);
+    return `<div class="col-xs-3 col-sm-offset-3 mt-5">
+    <div class="main_right_h">
+        <h4 class="main_timezone_h">${timezone}</h4>
+        <h4 class="main_coords_h">${lat}N ${lon}E</h4>
+    </div>
+  </div>`;
+  },
   createTimeContainer: (data) => {
     return `<div class="time_container">
       <span class="time mt-4">${data.hour}:${data.minutes}</span>
       <span class="time_am_pm">${data.am_pm}</span>
       </div>`;
   },
-  createDate: (data) => {
-    return `<span class="date mt-4">${data.dayOfWeek} ${data.day} ${data.month}</span>`;
+  createDateAndInfo: (data, currentWeatherData) => {
+    console.log(data);
+    return `
+    <div class="col-sm-5 mb-5">
+    <div class="main_left_date">
+    <img class="main_cloud_icon" src='http://openweathermap.org/img/wn/${currentWeatherData.icon}@2x.png' alt="Weather Icon">
+    <h4 class="date mt-4">${currentWeatherData.country}, ${currentWeatherData.dayOfWeek}, ${currentWeatherData.month} ${currentWeatherData.day}, ${currentWeatherData.year}, ${currentWeatherData.hour}:${currentWeatherData.minutes}${currentWeatherData.am_pm}</h4>
+    </div>
+    <p class="main_left_text">
+    ${data.weather[0].description} with a temperature of ${data.main.temp}°C and it feels like ${data.main.feels_like}°C. The wind speed is ${data.wind.speed} m/s from ${data.wind.deg} degrees, and clouds are covering ${data.clouds.all}% of the sky.
+    </p>
+    </div>
+  `
   },
   createWeatherCard: (data, currentWeatherData) => {
     return `<div class="current_weather_card mt-4">
@@ -217,7 +269,7 @@ const app = {
     } else if (weather.main === "Rain") {
       weatherSummary = `The current weather in ${location}, ${country} is rainy with a temperature of ${main.temp}°C and a humidity level of ${main.humidity}%. It's a good idea to bring an umbrella and a raincoat if you're planning to go out.`;
     } else if (weather.main === "Clouds") {
-      weatherSummary = `The current weather in ${location}, ${country} is cloudy with a temperature of ${main.temp}°C and a humidity level of ${main.humidity}%. Although it's not sunny, it's still a comfortable day to be outside.`;
+      weatherSummary = `The current weather in ${location}, ${country} is cloudy with a temperature of ${main.temp}°C and a humidity level of ${main.humidity}%. Although it's not sunny, it's still can be a comfortable day to be outside.`;
     } else if (weather.main === "Thunderstorm") {
       weatherSummary = `The current weather in ${location}, ${country} is experiencing a thunderstorm with a temperature of ${main.temp}°C and a humidity level of ${main.humidity}%. Please take necessary precautions and stay indoors if possible.`;
     }
@@ -235,7 +287,7 @@ const app = {
       cloudCover: data.clouds.all / 100,
       timeOfDay: data.sys,
       clouds: data.clouds,
-      weatherId: data.weather[0].id
+      weatherId: data.weather[0].id,
     };
     const background = app.setWeatherBackground(weather);
     document.querySelector("#live-bg").src = background;
@@ -245,14 +297,14 @@ const app = {
     const currentTime = new Date().getTime();
     const sunsetTime = new Date(weather.timeOfDay.sunset * 1000).getTime();
     const sunriseTime = new Date(weather.timeOfDay.sunrise * 1000).getTime();
-        // If it is currently after sunset or before sunrise, night cases:
+    // If it is currently after sunset or before sunrise, night cases:
     if (currentTime > sunsetTime || currentTime < sunriseTime) {
-        // If it is night time and there is thunderstorm
+      // If it is night time and there is thunderstorm
       if (weather.weatherId >= 200 && weather.weatherId < 300) {
         background = "/assets/thunderstorm_night.mp4";
         // If it is night time and there is rain
       } else if (weather.weatherId >= 500 && weather.weatherId < 600) {
-        background = "/assets/rainy_skies_night.mp4";
+        background = "/assets/rainy_night.mp4";
       } else {
         background = "/assets/clear-skies-night.mp4";
       }
@@ -262,7 +314,7 @@ const app = {
       background = "/assets/thunderstorm.mp4";
     } else if (weather.weatherId >= 500 && weather.weatherId < 600) {
       // If it is not night time and there is rain
-      background = "/assets/rainy_skies.mp4";
+      background = "/assets/rainy_skies_day.mp4";
     } else if (weather.clouds.all >= 50) {
       // If it is not night time and there is no precipitation, but the cloud cover is greater than 50%
       background = "/assets/cloudy_skies.mp4";
