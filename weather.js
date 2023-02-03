@@ -227,7 +227,6 @@ const app = {
       </div>`;
   },
   createDateAndInfo: (data, currentWeatherData) => {
-    console.log(data);
     return `
     <div class="col-sm-5 mb-5">
     <div class="main_left_date">
