@@ -1,10 +1,15 @@
-# Wether-Forecast-VanilaJS
+# Weatherwise - Wether Forecast VanilaJS
 
 This project is a weather forecast app that displays the current weather and a 7-day forecast for the user's current location. The app uses the HTML5 Geolocation API to get the user's current location and the Weatherbit and OpenWeatherMap APIs to fetch weather data. The app also uses Local storage to store data for future use
-and also to optimize performance.
+and also to optimize performance. 
+The code is organized in a way that emphasizes modularity and maintainability, making it easy for developers to add new features or update existing ones.
 
 # Progress Demo
  ![](https://github.com/ronM3/Wether-Forecast-vanila-javascript/blob/main/weather-web-gif.gif)
+ 
+# Live link
+https://weatherwise.onrender.com/
+
  
 ## Features
 - User-friendly interface
@@ -24,5 +29,3 @@ and also to optimize performance.
 - HTML5 Geolocation API
 - Local Storage
 
-# Live link
-Soon
