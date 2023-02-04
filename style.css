@@ -358,7 +358,7 @@ span.main_big_h.second {
   padding-bottom: 54%;
   position: relative;
   filter: drop-shadow(0 0 0.75rem rgb(206, 199, 201));
-  bottom: 2vw;
+  bottom: 3vw;
 }
 .google-map iframe {
   filter: grayscale(100%) invert(92%) contrast(83%);
@@ -426,7 +426,7 @@ span.main_big_h.second {
   }
   .main_left_text {
     padding: 15px;
-    font-size: 18px;
+    font-size: 17px;
     letter-spacing: 1.8px;
     line-height: 1.5em;
     margin: 4px auto 17px;
@@ -435,12 +435,16 @@ span.main_big_h.second {
   .main_left_date {
     padding: 0;
   }
-  .col-sm-5.mb-5.date_info{
-    background: rgba(248, 244, 244, 0.15);
+  .col-sm-5.mb-5.date_info {
+    background: rgba(248, 244, 244, 0.1);
+    border-bottom-right-radius: 15px;
   }
 }
 @media (min-width: 393px) {
   .wether_forecast {
     justify-content: center;
+  }
+  .google-map {
+    right: 3vw;
   }
 }
