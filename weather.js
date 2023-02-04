@@ -239,7 +239,7 @@ const app = {
   },
   createDateAndInfo: (data, currentWeatherData) => {
     return `
-    <div class="col-sm-5 mb-5">
+    <div class="col-sm-5 mb-5 date_info">
     <div class="main_left_date">
     <img class="main_cloud_icon" src='http://openweathermap.org/img/wn/${currentWeatherData.icon}@2x.png' alt="Weather Icon">
     <h4 class="date mt-4">${currentWeatherData.country}, ${currentWeatherData.dayOfWeek}, ${currentWeatherData.month} ${currentWeatherData.day}, ${currentWeatherData.year}, ${currentWeatherData.hour}:${currentWeatherData.minutes}${currentWeatherData.am_pm}</h4>

@@ -374,8 +374,7 @@ span.main_big_h.second {
   border: solid rgb(255, 251, 251);
   border-width: 0 3px 3px 0;
   display: none;
-  filter: drop-shadow(0 0 0.75rem rgb(206, 199, 201));
-  padding: 7px;
+  padding: 4px;
 }
 .left {
   transform: rotate(135deg);
@@ -417,13 +416,31 @@ span.main_big_h.second {
   .main_header {
     display: none;
   }
-  .main_right_h{
+  .main_right_h {
     display: none;
   }
-  .arrow{
+  .arrow {
     display: inline-block;
     position: relative;
-    left: 4px;
+    left: 2px;
+  }
+  .main_left_text {
+    padding: 15px;
+    font-size: 18px;
+    letter-spacing: 1.8px;
+    line-height: 1.5em;
+    margin: 4px auto 17px;
+    text-align: center;
+  }
+  .main_left_date {
+    padding: 0;
+  }
+  .col-sm-5.mb-5.date_info{
+    background: rgba(248, 244, 244, 0.15);
   }
 }
-
+@media (min-width: 393px) {
+  .wether_forecast {
+    justify-content: center;
+  }
+}
