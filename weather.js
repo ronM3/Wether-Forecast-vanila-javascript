@@ -2,7 +2,6 @@ const defaultLocation = {
   latitude: 37.7749,
   longitude: -122.4194,
 };
-
 const app = {
   inite: () => {
     window.addEventListener("load", app.getWeatherForecast);
@@ -105,6 +104,7 @@ const app = {
             app.displayBackground(data);
             app.displayCurrentWeather(data);
             // app.displayCurrentInfo(data);
+            app.createMapUi(data)
             app.createMainInfo(data);
             app.getWeatherSummary(data);
           })
@@ -183,15 +183,26 @@ const app = {
       </div>`;
     document.querySelector(".row.current").appendChild(newCol);
   },
+  createMapUi: (data) => {
+    let { lat, lon } = data.coord;
+    return `  <div class="col-sm-5 col-sm-offset-2 mb-5">
+    <div class="google-map">
+    <iframe width=370 height=350 style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${lat},${lon}&hl=es;z=14&output=embed"></iframe>
+    </div>
+     </div>
+    `
+  },
   createMainInfo: (data) => {
     const currentWeatherData = app.getCurrentTimeAndDate(data);
     const dateAndInfo = app.createDateAndInfo(data, currentWeatherData);
     const mainHeader = app.createMainHeader(data); 
     const mainTimezone = app.createMainTimezone(data);
+    const googleMap = app.createMapUi(data)
     const mainContent = `
     ${mainHeader}
     ${mainTimezone}
     ${dateAndInfo}
+    ${googleMap}
    `;
    document.querySelector(".row.main").innerHTML = mainContent;
   },
@@ -234,7 +245,7 @@ const app = {
     <h4 class="date mt-4">${currentWeatherData.country}, ${currentWeatherData.dayOfWeek}, ${currentWeatherData.month} ${currentWeatherData.day}, ${currentWeatherData.year}, ${currentWeatherData.hour}:${currentWeatherData.minutes}${currentWeatherData.am_pm}</h4>
     </div>
     <p class="main_left_text">
-    ${data.weather[0].description} with a temperature of ${data.main.temp}°C and it feels like ${data.main.feels_like}°C. The wind speed is ${data.wind.speed} m/s from ${data.wind.deg} degrees, and clouds are covering ${data.clouds.all}% of the sky.
+    ${data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1)} with a temperature of ${data.main.temp}°C and it feels like ${data.main.feels_like}°C. The wind speed is ${data.wind.speed} m/s from ${data.wind.deg} degrees, and clouds are covering ${data.clouds.all}% of the sky.
     </p>
     </div>
   `
@@ -356,6 +367,9 @@ const app = {
           </div>`;
       document.querySelector(".wether_forecast").innerHTML = content;
     });
+    const arrow = document.createElement('div')
+    arrow.innerHTML = `<i class="arrow left"></i>`
+    document.querySelector(".wether_forecast").prepend(arrow)
     app.displayForecastGraph(tempArr, "forecastGraph");
   },
   displayForecastGraph: (response, graphId) => {
