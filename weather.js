@@ -4,8 +4,14 @@ const defaultLocation = {
 };
 const app = {
   inite: () => {
+    const searchButton = document.querySelector(".btn-search");
+    console.log(searchButton);
     window.addEventListener("load", app.getWeatherForecast);
     window.addEventListener("load", app.getCurrentWeather);
+    searchButton.addEventListener("click", function() {
+      console.log('clicked');
+      app.searchLocation();
+    });
     setInterval(app.getCurrentWeather, 3600000);
   },
   getWeatherForecast: () => {
@@ -144,6 +150,32 @@ const app = {
     };
     return DateAndTime;
   },
+  searchLocation: () => {
+    const input = document.querySelector('.search__input').value;
+    // Use fetch API to get data from weatherbit API
+    const currentKey = config.API_KEY;
+    const forecastKey = config.API_KEY_WEATHERBIT;
+    const units = "metric";
+    fetch(`https://api.weatherbit.io/v2.0/forecast/daily?city=${input}&units=${units}&key=${forecastKey}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        app.showForecastWeather(data);
+      })
+      .catch(error => console.error(error));
+      
+    // Use fetch API to get data from OpenWeatherMap API
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${input}&units=${units}&appid=${currentKey}`)
+      .then(response => response.json())
+      .then(data => {
+        app.displayBackground(data);
+        app.displayCurrentWeather(data);
+        app.createMapUi(data)
+        app.createMainInfo(data);
+        app.getWeatherSummary(data);
+      })
+      .catch(error => console.error(error));
+  },
   // displayCurrentInfo: (data) => {
   //   const currentWeatherData = app.getCurrentTimeAndDate(data);
   //   const timeContainer = app.createTimeContainer(currentWeatherData);
@@ -220,13 +252,11 @@ const app = {
     const sign = timezone < 0 ? "-" : "+";
     const hours = Math.floor(Math.abs(timezone) / 3600);
     const minutes = Math.floor((Math.abs(timezone) % 3600) / 60);
-    const timezoneString = `Etc/GMT${sign}${hours
-      .toString()
+    const timezoneString = `GMT${sign}${hours.toString()
       .padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-    console.log(timezoneString);
     return `<div class="col-xs-3 col-sm-offset-3 mt-5">
     <div class="main_right_h">
-        <h4 class="main_timezone_h">${timezone}</h4>
+        <h4 class="main_timezone_h">${timezoneString}</h4>
         <h4 class="main_coords_h">${lat}N ${lon}E</h4>
     </div>
   </div>`;
