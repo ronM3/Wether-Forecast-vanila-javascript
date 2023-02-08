@@ -5,7 +5,7 @@ and also to optimize performance.
 The code is organized in a way that emphasizes modularity and maintainability, making it easy for developers to add new features or update existing ones.
 
 # Progress Demo
- ![](https://github.com/ronM3/Wether-Forecast-vanila-javascript/blob/main/weather-web-gif.gif)
+ ![](https://github.com/ronM3/Wether-Forecast-vanila-javascript/blob/main/Web-gif.gif)
  
 # Live link
 https://weatherwise.onrender.com/
