@@ -517,7 +517,7 @@ const app = {
           console.log(err);
         });
       app.fetchHourlyForecast(position).then((data) => {
-          app.displayForecastGraph(data, "forecastGraph");``
+          app.displayForecastGraph(data, "forecastGraph");
       })
         .catch((error)=>{
         console.log(error);
