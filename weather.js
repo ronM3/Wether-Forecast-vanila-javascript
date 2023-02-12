@@ -5,11 +5,22 @@ const defaultLocation = {
 const app = {
   inite: () => {
     const searchButton = document.querySelector(".btn-search");
+    const searchInput = document.querySelector('.search__input');
     console.log(searchButton);
     window.addEventListener("load", app.getWeatherForecast);
     window.addEventListener("load", app.getCurrentWeather);
     searchButton.addEventListener("click", function () {
       app.searchLocation();
+    });
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.keyCode === 13) {
+        searchButton.click();
+      }
+      searchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          searchButton.click();
+        }
+      });
     });
     setInterval(app.getCurrentWeather, 3600000);
   },
@@ -39,8 +50,8 @@ const app = {
   },
   fetchForecastData: async (position) => {
     const key = config.API_KEY_WEATHERBIT;
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
+    const lon = position.coords ? position.coords.longitude : defaultLocation.longitude;
+    const lat = position.coords ? position.coords.latitude : defaultLocation.latitude;
     const units = "metric";
     const url = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&units=${units}&key=${key}`;
     try {
@@ -77,12 +88,8 @@ const app = {
   },
   fetchCurrentWeather: async (position) => {
     const key = config.API_KEY;
-    const lon = position.coords
-      ? position.coords.longitude
-      : defaultLocation.longitude;
-    const lat = position.coords
-      ? position.coords.latitude
-      : defaultLocation.latitude;
+    const lon = position.coords ? position.coords.longitude : defaultLocation.longitude;
+    const lat = position.coords ? position.coords.latitude : defaultLocation.latitude;
     const units = "metric";
     const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=${units}&appid=${key}`;
     try {
@@ -129,12 +136,10 @@ const app = {
   getCurrentTimeAndDate: (data) => {
     let sunRiseSunSet = app.getSunriseSunset(data);
     let currentDate = new Date((data.dt + data.timezone) * 1000);
-    console.log(currentDate);
     let dayOfWeek = currentDate.toLocaleString("en-US", { weekday: "long" });
     let month = currentDate.toLocaleString("en-US", { month: "short" });
     let day = currentDate.getDate();
     let year = currentDate.getFullYear();
-
     const today = new Date();
     const hour = today.getHours();
     const minutes = today.getMinutes();
@@ -155,26 +160,23 @@ const app = {
     return DateAndTime;
   },
   searchLocation: () => {
-    const input = document.querySelector(".search__input").value;
+    const input = document.querySelector(".search__input");
     // Fetch API from weatherbit API
     const currentKey = config.API_KEY;
     const forecastKey = config.API_KEY_WEATHERBIT;
     const units = "metric";
     fetch(
-      `https://api.weatherbit.io/v2.0/forecast/daily?city=${input}&units=${units}&key=${forecastKey}`
+      `https://api.weatherbit.io/v2.0/forecast/daily?city=${input.value}&units=${units}&key=${forecastKey}`
     )
-      .then((response) => response.json())
-      .then((data) => {
+      .then((response) => response.json()).then((data) => {
         app.showForecastWeather(data);
       })
       .catch((error) => console.error(error));
-
     // Fetch API from OpenWeatherMap API
     fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${input}&units=${units}&appid=${currentKey}`
+      `https://api.openweathermap.org/data/2.5/weather?q=${input.value}&units=${units}&appid=${currentKey}`
     )
-      .then((response) => response.json())
-      .then((data) => {
+      .then((response) => response.json()).then((data) => {
         app.displayBackground(data);
         app.displayCurrentWeather(data);
         app.createMapUi(data);
@@ -182,6 +184,12 @@ const app = {
         app.getWeatherSummary(data);
       })
       .catch((error) => console.error(error));
+
+      fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${input.value}&units=${units}&appid=${currentKey}`)
+      .then((response) => response.json()).then((data) => {
+        app.displayForecastGraph(data, "forecastGraph");
+      })
+      input.value = "";
   },
   // displayCurrentInfo: (data) => {
   //   const currentWeatherData = app.getCurrentTimeAndDate(data);
@@ -196,12 +204,8 @@ const app = {
   // },
   fetchHourlyForecast: async (position) => {
     const key = config.API_KEY;
-    const lon = position.coords
-      ? position.coords.longitude
-      : defaultLocation.longitude;
-    const lat = position.coords
-      ? position.coords.latitude
-      : defaultLocation.latitude;
+    const lon = position.coords ? position.coords.longitude : defaultLocation.longitude;
+    const lat = position.coords ? position.coords.latitude : defaultLocation.latitude;
     const units = "metric";
     const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=${units}&appid=${key}`;
     try {
@@ -302,26 +306,12 @@ const app = {
     return `
     <div class="col-sm-5 mb-5 date_info">
     <div class="main_left_date">
-    <img class="main_cloud_icon" src='http://openweathermap.org/img/wn/${
-      currentWeatherData.icon
-    }@2x.png' alt="Weather Icon">
-    <h4 class="date mt-4">${currentWeatherData.country}, ${
-      currentWeatherData.dayOfWeek
-    }, ${currentWeatherData.month} ${currentWeatherData.day}, ${
-      currentWeatherData.year
-    }, ${currentWeatherData.hour}:${currentWeatherData.minutes}${
-      currentWeatherData.am_pm
-    }</h4>
+    <img class="main_cloud_icon" src='http://openweathermap.org/img/wn/${currentWeatherData.icon}@2x.png' alt="Weather Icon">
+    <h4 class="date mt-4">${currentWeatherData.country}, ${currentWeatherData.dayOfWeek}, ${currentWeatherData.month} ${currentWeatherData.day}, ${currentWeatherData.year
+    }, ${currentWeatherData.hour}:${currentWeatherData.minutes}${currentWeatherData.am_pm}</h4>
     </div>
     <p class="main_left_text">
-    ${
-      data.weather[0].description.charAt(0).toUpperCase() +
-      data.weather[0].description.slice(1)
-    } with a temperature of ${data.main.temp}°C and it feels like ${
-      data.main.feels_like
-    }°C. The wind speed is ${data.wind.speed} m/s from ${
-      data.wind.deg
-    } degrees, and clouds are covering ${data.clouds.all}% of the sky.
+    ${data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1)} with a temperature of ${data.main.temp}°C and it feels like ${data.main.feels_like}°C. The wind speed is ${data.wind.speed} m/s from ${data.wind.deg} degrees, and clouds are covering ${data.clouds.all}% of the sky.
     </p>
     </div>
   `;
@@ -408,18 +398,12 @@ const app = {
     return background;
   },
   showForecastWeather: (response) => {
-    let minTemps = [];
-    let maxTemps = [];
-    let tempArr = [];
     let content = "";
     response.data.map((day, index) => {
       let datetime = day.datetime;
       let date = new Date(datetime);
       let days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat",];
       let dayInString = days[date.getUTCDay()];
-      tempArr.push({ x: dayInString, y: day.app_max_temp });
-      // minTemps.push(day.app_min_temp);
-      // maxTemps.push(day.app_max_temp);
       content += `
           <div class="wether_card_item">
           <div class="card-body">
@@ -438,7 +422,6 @@ const app = {
     const arrow = document.createElement("div");
     arrow.innerHTML = `<i class="arrow left"></i>`;
     document.querySelector(".wether_forecast").prepend(arrow);
-    // app.displayForecastGraph(tempArr, "forecastGraph");
   },
   displayForecastGraph: (response, graphId) => {
     let graphData = [];
@@ -465,7 +448,6 @@ const app = {
       },
       options: {
         responsive: true,
-
         legend: {
           display: false,
         },
@@ -512,16 +494,22 @@ const app = {
           app.displayCurrentWeather(data);
           app.createMainInfo(data);
           app.getWeatherSummary(data);
-        })
+      })
         .catch((err) => {
           console.log(err);
-        });
+      });
       app.fetchHourlyForecast(position).then((data) => {
           app.displayForecastGraph(data, "forecastGraph");
       })
         .catch((error)=>{
-        console.log(error);
+         console.log(error);
       })
+      app.fetchForecastData(position).then((data) => {
+          app.showForecastWeather(data);
+      })
+        .catch((error) => {
+          console.error(error);
+      });
     } else {
       console.error(error);
     }

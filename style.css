@@ -91,13 +91,31 @@ video {
   border: 0;
   background: rgba(248, 244, 244, 0.2);
   width: 100%;
-  padding: 10px 70px 10px 32px;
+  padding: 7px 78px 10px 78px;
   font-size: 18px;
   color: #666;
   border-radius: 34px;
   display: flex;
   flex-wrap: wrap;
+  /* justify-content: center; */
+  text-align: center;
   align-items: center;
+}
+input::-webkit-input-placeholder {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* input:focus::-webkit-input-placeholder {
+  opacity: 0;
+}
+input:not(:focus)::-webkit-input-placeholder {
+  opacity: 0;
+} */
+
+input:focus::-webkit-input-placeholder {
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
 }
 .form-control {
   -webkit-text-size-adjust: 100%;
