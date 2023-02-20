@@ -97,24 +97,16 @@ video {
   border-radius: 34px;
   display: flex;
   flex-wrap: wrap;
-  /* justify-content: center; */
+  justify-content: center;
   text-align: center;
   align-items: center;
 }
 input::-webkit-input-placeholder {
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.5s ease-in-out;
 }
-
-/* input:focus::-webkit-input-placeholder {
-  opacity: 0;
-}
-input:not(:focus)::-webkit-input-placeholder {
-  opacity: 0;
-} */
-
 input:focus::-webkit-input-placeholder {
-  opacity: 1;
+  opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
 .form-control {
@@ -197,6 +189,15 @@ svg {
   left: 2rem;
   position: relative;
 }
+span#error_msg {
+  animation: fadeInOnly;
+  position: absolute;
+  top: 10%;
+  left: 38%;
+  animation-delay: 2100ms;
+  animation-duration: 3.6s;
+
+}
 .wether_forecast {
   display: flex;
   overflow-y: hidden;
@@ -220,6 +221,9 @@ svg {
   justify-content: space-between;
   color: wheat;
   text-align: center;
+}
+.sunrise_icon{
+  width: 30px;
 }
 .humidity {
   font-size: 35px;
@@ -407,6 +411,14 @@ span.main_big_h.second {
   }
   100% {
     transform: translateY(-5px);
+  }
+}
+@keyframes fadeInOnly {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
   }
 }
 @keyframes fadeInReveal {

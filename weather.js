@@ -6,28 +6,23 @@ const app = {
   inite: () => {
     const searchButton = document.querySelector(".btn-search");
     const searchInput = document.querySelector('.search__input');
-    console.log(searchButton);
     window.addEventListener("load", app.getWeatherForecast);
     window.addEventListener("load", app.getCurrentWeather);
-    searchButton.addEventListener("click", function () {
+    searchButton.addEventListener("click", function (event) {
+      console.log(event + '1');
+      event.preventDefault();
       app.searchLocation();
     });
-    searchInput.addEventListener('keypress', function(e) {
-      if (e.keyCode === 13) {
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
         searchButton.click();
       }
-      searchInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          searchButton.click();
-        }
-      });
     });
     setInterval(app.getCurrentWeather, 3600000);
   },
   getWeatherForecast: () => {
     let data = app.checkCache();
     if (data) {
-      console.log(data);
       app.showForecastWeather(data);
     } else {
       app.getlocation(
@@ -35,7 +30,6 @@ const app = {
           app
             .fetchForecastData(position)
             .then((data) => {
-              console.log(data);
               app.showForecastWeather(data);
             })
             .catch((error) => {
@@ -98,7 +92,6 @@ const app = {
         throw new Error("Something went wrong");
       }
       const data = await response.json();
-      console.log(data);
       return data;
     } catch (error) {
       throw error;
@@ -161,36 +154,69 @@ const app = {
   },
   searchLocation: () => {
     const input = document.querySelector(".search__input");
+    const errorBox = document.getElementById('error_msg');
     // Fetch API from weatherbit API
     const currentKey = config.API_KEY;
     const forecastKey = config.API_KEY_WEATHERBIT;
     const units = "metric";
-    fetch(
-      `https://api.weatherbit.io/v2.0/forecast/daily?city=${input.value}&units=${units}&key=${forecastKey}`
-    )
+    fetch(`https://api.weatherbit.io/v2.0/forecast/daily?city=${input.value}&units=${units}&key=${forecastKey}`)
       .then((response) => response.json()).then((data) => {
         app.showForecastWeather(data);
       })
       .catch((error) => console.error(error));
     // Fetch API from OpenWeatherMap API
-    fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${input.value}&units=${units}&appid=${currentKey}`
-    )
+    fetch(`https://api.openweathermap.org/data/2.5/weather?q=${input.value}&units=${units}&appid=${currentKey}`)
       .then((response) => response.json()).then((data) => {
+        console.log(data);
         app.displayBackground(data);
         app.displayCurrentWeather(data);
         app.createMapUi(data);
         app.createMainInfo(data);
         app.getWeatherSummary(data);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => {
+        console.log(error);
+        errorBox.innerText = "No results found"
+      });
 
-      fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${input.value}&units=${units}&appid=${currentKey}`)
+    fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${input.value}&units=${units}&appid=${currentKey}`)
       .then((response) => response.json()).then((data) => {
         app.displayForecastGraph(data, "forecastGraph");
       })
+      .catch((error) => {
+        console.log(error);
+        errorBox.innerText = "No results found"
+      });
       input.value = "";
   },
+  // searchLocation: async () => {
+  //   const input = document.querySelector(".search__input");
+  //   const errorBox = document.getElementById('error_msg');
+  //   const currentKey = config.API_KEY;
+  //   const forecastKey = config.API_KEY_WEATHERBIT;
+  //   const units = "metric";
+    
+  //   try {
+  //     const [weatherData, forecastWeekly, forecasHourly] = await Promise.all([
+  //       fetch(`https://api.openweathermap.org/data/2.5/weather?q=${input.value}&units=${units}&appid=${currentKey}`).then(res => res.json()),
+  //       fetch(`https://api.weatherbit.io/v2.0/forecast/daily?city=${input.value}&units=${units}&key=${forecastKey}`).then(res => res.json()),
+  //       fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${input.value}&units=${units}&appid=${currentKey}`).then(res => res.json())
+  //     ]);
+  //     console.log(weatherData);
+  //     app.displayBackground(weatherData);
+  //     app.displayCurrentWeather(weatherData);
+  //     app.createMapUi(weatherData);
+  //     app.createMainInfo(weatherData);
+  //     app.getWeatherSummary(weatherData);
+  //     app.showForecastWeather(forecastWeekly);
+  //     app.displayForecastGraph(forecasHourly, "forecastGraph");
+  //     input.value = "";
+  //   } catch (error) {
+  //     console.error(error);
+  //     console.log(error);
+  //     errorBox.innerText = "Something went wrong";
+  //   }
+  // },
   // displayCurrentInfo: (data) => {
   //   const currentWeatherData = app.getCurrentTimeAndDate(data);
   //   const timeContainer = app.createTimeContainer(currentWeatherData);
