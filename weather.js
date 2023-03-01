@@ -277,7 +277,7 @@ const app = {
   },
   createMapUi: (data) => {
     let { lat, lon } = data.coord;
-    return `  <div class="col-sm-5 col-sm-offset-2 mb-5">
+    return `<div class="col-sm-5 col-sm-offset-2 mb-5">
     <div class="google-map">
     <iframe width=370 height=350 style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=${lat},${lon}&hl=es;z=14&output=embed"></iframe>
     </div>
